@@ -18,7 +18,7 @@ if "bpy" in locals():
 
 bl_info = {
     "name": "BVH to SL",
-    "author": "Campbell Barton",
+    "author": "Campbell Barton, Andrea Rugliancich, Nikita Akimov",
     "blender": (2, 83, 13),
     "location": "File > Export",
     "description": "Unofficial fork of the original Campbell Barton's add-on for exporting BVH to SL",
