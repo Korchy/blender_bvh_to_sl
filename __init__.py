@@ -9,7 +9,7 @@ from bpy.props import (StringProperty,
                        )
 from bpy.types import TOPBAR_MT_file_export
 from bpy.utils import register_class, unregister_class
-from bpy_extras.io_utils import ImportHelper, ExportHelper
+from bpy_extras.io_utils import ExportHelper
 
 if "bpy" in locals():
     import importlib
