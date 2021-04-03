@@ -1,21 +1,3 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
-# ##### END GPL LICENSE BLOCK #####
-
 # <pep8 compliant>
 
 # Script copyright (C) Campbell Barton
@@ -237,16 +219,16 @@ def write_armature(context,
             itrans = Matrix.Translation(-dbone.rest_bone.head_local)
 
             if  dbone.parent:
-                mat_final = dbone.parent.rest_arm_mat * dbone.parent.pose_imat * dbone.pose_mat * dbone.rest_arm_imat
-                mat_final = itrans * mat_final * trans
+                mat_final = dbone.parent.rest_arm_mat @ dbone.parent.pose_imat @ dbone.pose_mat @ dbone.rest_arm_imat
+                mat_final = itrans @ mat_final @ trans
                 loc = mat_final.to_translation() + (dbone.rest_bone.head_local - dbone.parent.rest_bone.head_local)
             else:
-                mat_final = dbone.pose_mat * dbone.rest_arm_imat
-                mat_final = itrans * mat_final * trans
+                mat_final = dbone.pose_mat @ dbone.rest_arm_imat
+                mat_final = itrans @ mat_final @ trans
                 loc = mat_final.to_translation() + dbone.rest_bone.head
 
             # keep eulers compatible, no jumping on interpolation.
-            rot = mat_final.to_3x3().inverted().to_euler(dbone.rot_order_str, dbone.prev_euler)
+            rot = mat_final.to_3x3().inverted_safe().to_euler(dbone.rot_order_str, dbone.prev_euler)
 
             if not dbone.skip_position:
                 file.write("%.6f %.6f %.6f " % (loc * global_scale)[:])

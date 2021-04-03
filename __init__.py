@@ -1,43 +1,4 @@
-# ##### BEGIN GPL LICENSE BLOCK #####
-#
-#  This program is free software; you can redistribute it and/or
-#  modify it under the terms of the GNU General Public License
-#  as published by the Free Software Foundation; either version 2
-#  of the License, or (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software Foundation,
-#  Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
-#
-# ##### END GPL LICENSE BLOCK #####
-
 # <pep8-80 compliant>
-
-bl_info = {
-    "name": "BioVision Motion Capture (BVH) format",
-    "author": "Campbell Barton",
-    "blender": (2, 5, 7),
-    "api": 35622,
-    "location": "File > Import-Export",
-    "description": "Import-Export BVH from armature objects",
-    "warning": "",
-    "wiki_url": ("http://wiki.blender.org/index.php/Extensions:2.5/Py/"
-                 "Scripts/Import-Export/MotionCapture_BVH"),
-    "tracker_url": "",
-    "support": 'OFFICIAL',
-    "category": "Import-Export"}
-
-if "bpy" in locals():
-    import imp
-    if "import_bvh" in locals():
-        imp.reload(import_bvh)
-    if "export_bvh" in locals():
-        imp.reload(export_bvh)
 
 import bpy
 from bpy.props import (StringProperty,
@@ -46,71 +7,29 @@ from bpy.props import (StringProperty,
                        BoolProperty,
                        EnumProperty,
                        )
+from bpy.types import TOPBAR_MT_file_export
+from bpy.utils import register_class, unregister_class
 from bpy_extras.io_utils import ImportHelper, ExportHelper
 
+if "bpy" in locals():
+    import importlib
+    if "export_bvh" in locals():
+        importlib.reload(export_bvh)
 
-class ImportBVH(bpy.types.Operator, ImportHelper):
-    '''Load a BVH motion capture file'''
-    bl_idname = "import_anim.bvh"
-    bl_label = "Import BVH"
-    bl_options = {'REGISTER', 'UNDO'}
-
-    filename_ext = ".bvh"
-    filter_glob = StringProperty(default="*.bvh", options={'HIDDEN'})
-
-    target = EnumProperty(items=(
-            ('ARMATURE', "Armature", ""),
-            ('OBJECT', "Object", ""),
-            ),
-                name="Target",
-                description="Import target type.",
-                default='ARMATURE')
-
-    global_scale = FloatProperty(
-            name="Scale",
-            description="Scale the BVH by this value",
-            min=0.0001, max=1000000.0,
-            soft_min=0.001, soft_max=100.0,
-            default=1.0,
-            )
-    frame_start = IntProperty(
-            name="Start Frame",
-            description="Starting frame for the animation",
-            default=1,
-            )
-    use_cyclic = BoolProperty(
-            name="Loop",
-            description="Loop the animation playback",
-            default=False,
-            )
-    rotate_mode = EnumProperty(
-            name="Rotation",
-            description="Rotation conversion.",
-            items=(('QUATERNION', "Quaternion",
-                    "Convert rotations to quaternions"),
-                   ('NATIVE', "Euler (Native)", ("Use the rotation order "
-                                                 "defined in the BVH file")),
-                   ('XYZ', "Euler (XYZ)", "Convert rotations to euler XYZ"),
-                   ('XZY', "Euler (XZY)", "Convert rotations to euler XZY"),
-                   ('YXZ', "Euler (YXZ)", "Convert rotations to euler YXZ"),
-                   ('YZX', "Euler (YZX)", "Convert rotations to euler YZX"),
-                   ('ZXY', "Euler (ZXY)", "Convert rotations to euler ZXY"),
-                   ('ZYX', "Euler (ZYX)", "Convert rotations to euler ZYX"),
-                   ),
-            default='NATIVE',
-            )
-
-    def execute(self, context):
-        keywords = self.as_keywords(ignore=("filter_glob",))
-
-        from . import import_bvh
-        return import_bvh.load(self, context, **keywords)
+bl_info = {
+    "name": "BVH to SL",
+    "author": "Campbell Barton",
+    "blender": (2, 83, 13),
+    "location": "File > Export",
+    "description": "Unofficial fork of the original Campbell Barton's add-on for exporting BVH to SL",
+    "doc_url": "{BLENDER_MANUAL_URL}/addons/import_export/anim_bvh.html",
+    "category": "Import-Export"}
 
 
-class ExportBVH(bpy.types.Operator, ExportHelper):
-    '''Save a BVH motion capture file from an armature'''
-    bl_idname = "export_anim.bvh"
-    bl_label = "Export BVH"
+class BVH_TO_SL_OT_export(bpy.types.Operator, ExportHelper):
+    """Save a BVH motion capture file from an armature"""
+    bl_idname = "bvh_to_sl.export"
+    bl_label = "Export BVH to SL"
 
     filename_ext = ".bvh"
     filter_glob = StringProperty(
@@ -177,26 +96,21 @@ class ExportBVH(bpy.types.Operator, ExportHelper):
         return export_bvh.save(self, context, **keywords)
 
 
-def menu_func_import(self, context):
-    self.layout.operator(ImportBVH.bl_idname, text="Motion Capture (.bvh)")
-
-
 def menu_func_export(self, context):
-    self.layout.operator(ExportBVH.bl_idname, text="Motion Capture (.bvh)")
+    self.layout.operator(BVH_TO_SL_OT_export.bl_idname, text="Export BVH to SL (.bvh)")
 
 
 def register():
-    bpy.utils.register_module(__name__)
+    register_class(BVH_TO_SL_OT_export)
 
-    bpy.types.INFO_MT_file_import.append(menu_func_import)
-    bpy.types.INFO_MT_file_export.append(menu_func_export)
+    TOPBAR_MT_file_export.append(menu_func_export)
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
+    unregister_class(BVH_TO_SL_OT_export)
 
-    bpy.types.INFO_MT_file_import.remove(menu_func_import)
-    bpy.types.INFO_MT_file_export.remove(menu_func_export)
+    TOPBAR_MT_file_export.remove(menu_func_export)
+
 
 if __name__ == "__main__":
     register()
