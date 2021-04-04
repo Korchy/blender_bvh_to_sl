@@ -109,6 +109,11 @@ def write_armature(context,
 
     else:
         # Write a dummy parent node
+        i = 0
+        key = "__%d" % i
+        while key in children:
+            i += 1
+            key = "__%d" % i
         file.write("ROOT %s\n" % key)
         file.write("{\n")
         file.write("\tOFFSET 0.0 0.0 0.0\n")
